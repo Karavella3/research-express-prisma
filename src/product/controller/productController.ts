@@ -1,11 +1,13 @@
-import { Prisma, User } from '@prisma/client';
 import { NextFunction, Request, Response } from 'express';
+import { z } from 'zod';
 import prismaClient from '../../core/db/prismaClient';
 import { NotFoundError } from '../../core/utils/NotFoundError';
+import productCreateSchema from '../schemas/productCreateSchema';
+import productEditSchema from '../schemas/productEditSchema';
 
 const list = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const result = await prismaClient.user.findMany();
+    const result = await prismaClient.product.findMany();
 
     res.json(result);
   } catch (error) {
@@ -14,15 +16,19 @@ const list = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const getById = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = Number(req.params.userId);
+  const productId = Number(req.params.productId);
 
   try {
-    const result = await prismaClient.user.findUnique({
-      where: { id: userId },
+    const result = await prismaClient.product.findUnique({
+      where: { id: productId },
     });
 
     if (!result) {
-      throw new NotFoundError({ details: { userId } });
+      throw new NotFoundError({
+        details: {
+          productId,
+        },
+      });
     }
 
     res.json(result);
@@ -32,23 +38,19 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
 };
 
 const create = async (
-  req: Request<never, never, Prisma.UserCreateInput>,
+  req: Request<never, never, z.infer<typeof productCreateSchema>>,
   res: Response,
   next: NextFunction
 ) => {
-  const { name, surname } = req.body;
+  const { title, description } = req.body;
 
   try {
-    const result = await prismaClient.user.create({
+    const result = await prismaClient.product.create({
       data: {
-        name,
-        surname,
+        title,
+        description,
         createdAt: new Date(),
-        cart: {
-          create: {
-            updatedAt: new Date(),
-          },
-        },
+        updatedAt: new Date(),
       },
     });
     res.status(201).json(result);
@@ -58,26 +60,31 @@ const create = async (
 };
 
 const edit = async (
-  req: Request<never, never, User>,
+  req: Request<never, never, z.infer<typeof productEditSchema>>,
   res: Response,
   next: NextFunction
 ) => {
-  const { id, name, surname } = req.body;
+  const { id, description, title } = req.body;
 
   try {
-    const user = await prismaClient.user.findUnique({
+    const product = await prismaClient.product.findUnique({
       where: { id },
     });
 
-    if (!user) {
-      throw new NotFoundError({ details: { id } });
+    if (!product) {
+      throw new NotFoundError({
+        details: {
+          id,
+        },
+      });
     }
 
-    const result = await prismaClient.user.update({
+    const result = await prismaClient.product.update({
       where: { id },
       data: {
-        name,
-        surname,
+        title,
+        description,
+        updatedAt: new Date(),
       },
     });
     res.json(result);
@@ -87,21 +94,11 @@ const edit = async (
 };
 
 const deleteById = async (req: Request, res: Response, next: NextFunction) => {
-  const userId = Number(req.params.userId);
+  const productId = Number(req.params.productId);
 
   try {
-    const user = await prismaClient.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user) {
-      throw new NotFoundError({ details: { userId } });
-    }
-
-    await prismaClient.cart.delete({
-      where: {
-        id: user.cartId,
-      },
+    await prismaClient.product.delete({
+      where: { id: productId },
     });
     res.json({ message: 'Success' });
   } catch (error) {

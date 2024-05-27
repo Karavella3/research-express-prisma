@@ -9,7 +9,7 @@ export class ErrorInfo implements IErrorInfo {
     Object.assign(this, errorInfo);
   }
 
-  status = 500;
-  error = 'Internal Server Error';
-  details = null;
+  status: number = 500;
+  error: string = 'Internal Server Error';
+  details: object | null = null;
 }
