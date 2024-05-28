@@ -43,11 +43,8 @@ const create = async (
       data: {
         name,
         surname,
-        createdAt: new Date(),
         cart: {
-          create: {
-            updatedAt: new Date(),
-          },
+          create: {},
         },
       },
     });

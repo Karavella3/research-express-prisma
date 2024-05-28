@@ -12,18 +12,8 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
       where: {
         id: cartId,
       },
-    });
-
-    const products = await prismaClient.product.findMany({
-      where: {
-        carts: {
-          some: {
-            cartId,
-            count: {
-              gt: 0,
-            },
-          },
-        },
+      include: {
+        products: true,
       },
     });
 
@@ -35,7 +25,7 @@ const getById = async (req: Request, res: Response, next: NextFunction) => {
       });
     }
 
-    res.json({ ...cart, products });
+    res.json(cart);
   } catch (error) {
     next(error);
   }
@@ -85,7 +75,6 @@ const product = async (
         },
       },
       create: {
-        assignedAt: new Date(),
         cartId,
         productId,
         count,

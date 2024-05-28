@@ -49,8 +49,6 @@ const create = async (
       data: {
         title,
         description,
-        createdAt: new Date(),
-        updatedAt: new Date(),
       },
     });
     res.status(201).json(result);
@@ -84,7 +82,6 @@ const edit = async (
       data: {
         title,
         description,
-        updatedAt: new Date(),
       },
     });
     res.json(result);
