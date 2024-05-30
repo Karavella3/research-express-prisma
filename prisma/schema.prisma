@@ -1,44 +1,53 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-    id        Int      @id @default(autoincrement())
-    name      String
-    surname   String
-    cartId    Int      @unique
-    createdAt DateTime @default(now())
-    cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  id        Int       @id @default(autoincrement())
+  name      String
+  surname   String
+  cartId    Int       @unique
+  createdAt DateTime  @default(now())
+  cart      Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  companies Company[] @relation("CompanyToUser")
+}
+
+model Company {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  name      String
+  updatedAt DateTime @updatedAt
+  users     User[]   @relation("CompanyToUser")
 }
 
 model Cart {
-    id        Int               @id @default(autoincrement())
-    updatedAt DateTime          @updatedAt
-    products  ProductsInCarts[]
-    user      User?
+  id        Int               @id @default(autoincrement())
+  updatedAt DateTime          @updatedAt
+  products  ProductsInCarts[]
+  user      User?
 }
 
 model Product {
-    id          Int               @id @default(autoincrement())
-    createdAt   DateTime          @default(now())
-    updatedAt   DateTime          @updatedAt
-    description String?
-    title       String
-    carts       ProductsInCarts[]
+  id          Int               @id @default(autoincrement())
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  description String?
+  title       String
+  carts       ProductsInCarts[]
 }
 
 model ProductsInCarts {
-    cartId     Int
-    productId  Int
-    assignedAt DateTime @default(now())
-    count      Int      @default(1)
-    cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-    product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  cartId     Int
+  productId  Int
+  assignedAt DateTime @default(now())
+  count      Int      @default(1)
+  cart       Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 
-    @@id([cartId, productId])
+  @@id([cartId, productId])
 }
